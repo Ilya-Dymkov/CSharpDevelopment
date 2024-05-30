@@ -3,7 +3,7 @@ using CSharpDevelopment.Models;
 using CSharpDevelopment.Services.SourcesService;
 using Microsoft.EntityFrameworkCore;
 
-namespace CSharpDevelopment.Services;
+namespace CSharpDevelopment.Services;   
 
 public class UserService : IUserService
 {
@@ -11,7 +11,7 @@ public class UserService : IUserService
 
     public Task<List<User>> GetActiveUsersAsync() =>
         _context.Users
-            .Where(u => u.RevorkedOn != null)
+            .Where(u => u.RevorkedOn == null)
             .OrderBy(u => u.CreatedOn)
             .ToListAsync();
 
