@@ -106,28 +106,32 @@ public class UsersController : ControllerBase
         await BaseOfUpdate(requestingLogin, requestingPassword, login, async () => 
             await _userService.UpdatePasswordUserAsync(login, newPassword, requestingLogin));
 
-    private async Task<IActionResult> BaseOfAction(string requestingLogin, string requestingPassword, Func<Task> func)
+    private async Task<IActionResult> BaseOfAction(string requestingLogin, string requestingPassword,
+        Func<Task> func, string outputMessage)
     {
         if (!await _userService.AdminConfirmationAsync(requestingLogin, requestingPassword))
             return BadRequest("Login or password contains an error!");
 
         await func();
         
-        return Ok("User has been successfully deleted!");
+        return Ok(outputMessage);
     }
     
     [HttpDelete("{requestingLogin}/{login}/SoftDeleteUser")]
     public async Task<IActionResult> SoftDeleteUser(string requestingLogin, string requestingPassword, string login) =>
         await BaseOfAction(requestingLogin, requestingPassword,
-            () => _userService.SoftDeleteUser(login, requestingLogin));
+            () => _userService.SoftDeleteUser(login, requestingLogin),
+            "User has been successfully deleted!");
 
     [HttpDelete("{requestingLogin}/{login}/HardDeleteUser")]
     public async Task<IActionResult> HardDeleteUser(string requestingLogin, string requestingPassword, string login) =>
         await BaseOfAction(requestingLogin, requestingPassword,
-            () => _userService.HardDeleteUser(login));
+            () => _userService.HardDeleteUser(login),
+            "User has been successfully full deleted!");
 
     [HttpPut("{requestingLogin}/RecoveryUser")]
     public async Task<IActionResult> RecoveryUser(string requestingLogin, string requestingPassword, string login) =>
         await BaseOfAction(requestingLogin, requestingPassword,
-            () => _userService.RecoveryUser(login));
+            () => _userService.RecoveryUser(login),
+            "User has been successfully recovered!");
 }

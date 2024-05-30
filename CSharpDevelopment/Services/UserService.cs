@@ -23,18 +23,11 @@ public class UserService : IUserService
             .Where(u => u.Birthday > certainAge)
             .ToListAsync();
 
-    public async Task CreateUserAsync(string login,
-        string password,
-        string name,
-        int gender,
-        DateTime birthday,
-        bool isAdmin,
-        string createdBy)
-    {
-        if (_context.Users.Any(u => u.Login == login))
-            throw new ArgumentException("This login is already occupied!");
-        
-        await _context.Users.AddAsync(new(login, password, name, gender, birthday, isAdmin, createdBy));
+    public async Task CreateUserAsync(string login, string password, string name, int gender,
+        DateTime birthday, bool isAdmin, string createdBy)
+    {   
+        await _context.Users.AddAsync(new User().GetNewUser(_context.Users, login, password, name, gender,
+            birthday, isAdmin, createdBy));
         await _context.SaveChangesAsync();
     }
 
@@ -54,16 +47,15 @@ public class UserService : IUserService
         await BaseOfActionOnUser(login, user =>
         {
             actionUpdate(user);
-            user.ModifiedOn = DateTime.Now;
-            user.ModifiedBy = modifiedBy;
+            user.SetModified(DateTime.Now, modifiedBy);
         });
 
     public async Task UpdateDataUserAsync(string login, string name, int gender, DateTime birthday, string modifiedBy) =>
         await BaseOfUpdateAsync(login, user =>
         {
             user.SetName(name);
-            user.Gender = gender;
-            user.Birthday = birthday;
+            user.SetGender(gender);
+            user.SetBirthday(birthday);
         }, modifiedBy);
 
     public async Task UpdateLoginUserAsync(string oldLogin, string newLogin, string modifiedBy) =>
@@ -73,21 +65,13 @@ public class UserService : IUserService
         await BaseOfUpdateAsync(login, user => user.SetPassword(newPassword), modifiedBy);
 
     public async Task SoftDeleteUser(string login, string revorkedBy) =>
-        await BaseOfActionOnUser(login, user =>
-        {
-            user.RevorkedOn = DateTime.Now;
-            user.RevorkedBy = revorkedBy;
-        });
+        await BaseOfActionOnUser(login, user => user.SetRevorked(DateTime.Now, revorkedBy));
 
     public async Task HardDeleteUser(string login) =>
         await BaseOfActionOnUser(login, user => _context.Users.Remove(user));
 
     public async Task RecoveryUser(string login) =>
-        await BaseOfActionOnUser(login, user =>
-        {
-            user.RevorkedOn = null;
-            user.RevorkedBy = null;
-        });
+        await BaseOfActionOnUser(login, user => user.SetRevorked(null, null));
 
     public Task<bool> UserConfirmationAsync(string login, string password) =>
         Task.FromResult(_context.Users.Any(u =>

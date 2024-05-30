@@ -1,50 +1,45 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 
 namespace CSharpDevelopment.Models;
 
 [PrimaryKey(nameof(System.Guid))]
-public partial class User(
-    string login,
-    string password,
-    string name,
-    int gender,
-    DateTime birthday,
-    bool isAdmin,
-    string createdBy)
+public partial class User
 {
     [JsonIgnore]
-    public Guid Guid { get; set; } = Guid.NewGuid();
+    public Guid Guid { get; private set; }
 
-    public string Login { get; private set; } = login;
-
-    [JsonIgnore]
-    public string Password { get; private set; } = GetHashPassword(password);
-
-    public string Name { get; private set; } = name;
-    public int Gender { get; set; } = gender;
-    public DateTime Birthday { get; set; } = birthday;
+    public string Login { get; private set; }
 
     [JsonIgnore]
-    public bool IsAdmin { get; set; } = isAdmin;
+    public string Password { get; private set; }
+
+    public string Name { get; private set; }
+    public int Gender { get; private set; }
+    public DateTime Birthday { get; private set; }
 
     [JsonIgnore]
-    public DateTime CreatedOn { get; set; } = DateTime.Now;
+    public bool IsAdmin { get; private set; }
 
     [JsonIgnore]
-    public string CreatedBy { get; set; } = createdBy;
+    public DateTime CreatedOn { get; private set; }
 
     [JsonIgnore]
-    public DateTime ModifiedOn { get; set; } = DateTime.Now;
+    public string CreatedBy { get; private set; }
 
     [JsonIgnore]
-    public string ModifiedBy { get; set; } = createdBy;
+    public DateTime ModifiedOn { get; private set; }
 
     [JsonIgnore]
-    public DateTime? RevorkedOn { get; set; }
+    public string ModifiedBy { get; private set; }
+
     [JsonIgnore]
-    public string? RevorkedBy { get; set; }
+    public DateTime? RevorkedOn { get; private set; }
+    [JsonIgnore]
+    public string? RevorkedBy { get; private set; }
     public string IsActive => RevorkedOn == null ? "Active" : "Inactive";
     
     [GeneratedRegex("^[a-zA-Z0-9]+$")]
@@ -60,8 +55,11 @@ public partial class User(
 
         Login = login;
     }
-    
-    public static string GetHashPassword(string newPassword) => newPassword;
+
+    public static string GetHashPassword(string newPassword) => 
+        BitConverter.ToString(SHA256.HashData(Encoding.UTF8.GetBytes(newPassword)))
+            .Replace("-", "")
+            .ToLower();
 
     public void SetPassword(string newPassword)
     {
@@ -80,5 +78,44 @@ public partial class User(
             throw new ArgumentException("Name is not set correctly!");
 
         Name = name;
+    }
+
+    public void SetGender(int gender)
+    {
+        if (gender is < 0 or > 2)
+            throw new ArgumentException("Gender is not set correctly!");
+
+        Gender = gender;
+    }
+
+    public void SetBirthday(DateTime birthday) => Birthday = birthday;
+
+    public void SetModified(DateTime modifiedOn, string modifiedBy)
+    {
+        ModifiedOn = modifiedOn;
+        ModifiedBy = modifiedBy;
+    }
+
+    public void SetRevorked(DateTime? revorkedOn, string? revorkedBy)
+    {
+        RevorkedOn = revorkedOn;
+        RevorkedBy = revorkedBy;
+    }
+
+    public User GetNewUser(DbSet<User> users, string login, string password, string name, int gender,
+        DateTime birthday, bool isAdmin, string createdBy)
+    {
+        Guid = Guid.NewGuid();
+        SetLogin(login, users);
+        SetPassword(password);
+        SetName(name);
+        SetGender(gender);
+        SetBirthday(birthday);
+        IsAdmin = isAdmin;
+        CreatedOn = DateTime.Now;
+        CreatedBy = createdBy;
+        SetModified(DateTime.Now, createdBy);
+
+        return this;
     }
 }
