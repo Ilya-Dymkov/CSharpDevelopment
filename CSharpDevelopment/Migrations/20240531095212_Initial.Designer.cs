@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CSharpDevelopment.Migrations
 {
     [DbContext(typeof(DataDbContext))]
-    [Migration("20240529191003_Initial")]
+    [Migration("20240531095212_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -61,10 +61,10 @@ namespace CSharpDevelopment.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RevorkedBy")
+                    b.Property<string>("RevokedBy")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("RevorkedOn")
+                    b.Property<DateTime?>("RevokedOn")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Guid");

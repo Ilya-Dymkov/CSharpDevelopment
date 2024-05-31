@@ -26,8 +26,8 @@ namespace CSharpDevelopment.Migrations
                     CreatedBy = table.Column<string>(type: "TEXT", nullable: false),
                     ModifiedOn = table.Column<DateTime>(type: "TEXT", nullable: false),
                     ModifiedBy = table.Column<string>(type: "TEXT", nullable: false),
-                    RevorkedOn = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    RevorkedBy = table.Column<string>(type: "TEXT", nullable: true)
+                    RevokedOn = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    RevokedBy = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {

@@ -58,10 +58,10 @@ namespace CSharpDevelopment.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RevorkedBy")
+                    b.Property<string>("RevokedBy")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("RevorkedOn")
+                    b.Property<DateTime?>("RevokedOn")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Guid");

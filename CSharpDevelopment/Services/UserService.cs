@@ -7,20 +7,25 @@ namespace CSharpDevelopment.Services;
 
 public class UserService : IUserService
 {
-    private readonly DataDbContext _context = new();
+    private readonly DataDbContext _context;
+
+    public UserService() => _context = new DataDbContext();
+
+    public UserService(Func<DbContextOptionsBuilder, DbContextOptionsBuilder> func) => 
+        _context = new DataDbContext(func);
 
     public Task<List<User>> GetActiveUsersAsync() =>
         _context.Users
-            .Where(u => u.RevorkedOn == null)
+            .Where(u => u.RevokedOn == null)
             .OrderBy(u => u.CreatedOn)
             .ToListAsync();
 
     public Task<User?> GetUserAsync(string login) =>
         _context.Users.FirstOrDefaultAsync(u => u.Login == login);
 
-    public Task<List<User>> GetUsersOverCertainAgeAsync(DateTime certainAge) =>
+    public Task<List<User>> GetUsersOverCertainAgeAsync(uint certainAge) =>
         _context.Users
-            .Where(u => u.Birthday > certainAge)
+            .Where(u => (DateTime.Now - u.Birthday).Days > certainAge * 365.25)
             .ToListAsync();
 
     public async Task CreateUserAsync(string login, string password, string name, int gender,
@@ -64,20 +69,20 @@ public class UserService : IUserService
     public async Task UpdatePasswordUserAsync(string login, string newPassword, string modifiedBy) => 
         await BaseOfUpdateAsync(login, user => user.SetPassword(newPassword), modifiedBy);
 
-    public async Task SoftDeleteUser(string login, string revorkedBy) =>
-        await BaseOfActionOnUser(login, user => user.SetRevorked(DateTime.Now, revorkedBy));
+    public async Task SoftDeleteUser(string login, string revokedBy) =>
+        await BaseOfActionOnUser(login, user => user.SetRevoked(DateTime.Now, revokedBy));
 
     public async Task HardDeleteUser(string login) =>
         await BaseOfActionOnUser(login, user => _context.Users.Remove(user));
 
     public async Task RecoveryUser(string login) =>
-        await BaseOfActionOnUser(login, user => user.SetRevorked(null, null));
+        await BaseOfActionOnUser(login, user => user.SetRevoked(null, null));
 
     public Task<bool> UserConfirmationAsync(string login, string password) =>
         Task.FromResult(_context.Users.Any(u =>
-            u.Login == login && u.Password == User.GetHashPassword(password) && u.RevorkedOn == null));
+            u.Login == login && u.Password == User.GetHashPassword(password) && u.RevokedOn == null));
 
     public Task<bool> AdminConfirmationAsync(string login, string password) =>
         Task.FromResult(_context.Users.Any(u =>
-            u.Login == login && u.Password == User.GetHashPassword(password) && u.RevorkedOn == null && u.IsAdmin));
+            u.Login == login && u.Password == User.GetHashPassword(password) && u.RevokedOn == null && u.IsAdmin));
 }

@@ -37,10 +37,10 @@ public partial class User
     public string ModifiedBy { get; private set; }
 
     [JsonIgnore]
-    public DateTime? RevorkedOn { get; private set; }
+    public DateTime? RevokedOn { get; private set; }
     [JsonIgnore]
-    public string? RevorkedBy { get; private set; }
-    public string IsActive => RevorkedOn == null ? "Active" : "Inactive";
+    public string? RevokedBy { get; private set; }
+    public string IsActive => RevokedOn == null ? "Active" : "Inactive";
     
     [GeneratedRegex("^[a-zA-Z0-9]+$")]
     private static partial Regex LettersAndNumbersRegex();
@@ -96,10 +96,10 @@ public partial class User
         ModifiedBy = modifiedBy;
     }
 
-    public void SetRevorked(DateTime? revorkedOn, string? revorkedBy)
+    public void SetRevoked(DateTime? revokedOn, string? revokedBy)
     {
-        RevorkedOn = revorkedOn;
-        RevorkedBy = revorkedBy;
+        RevokedOn = revokedOn;
+        RevokedBy = revokedBy;
     }
 
     public User GetNewUser(DbSet<User> users, string login, string password, string name, int gender,

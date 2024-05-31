@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using CSharpDevelopment.Models;
-using CSharpDevelopment.Services;
+using CSharpDevelopment.Proxies;
 using CSharpDevelopment.Services.SourcesService;
 
 namespace CSharpDevelopment.Controllers;
@@ -9,7 +9,7 @@ namespace CSharpDevelopment.Controllers;
 [ApiController]
 public class UsersController : ControllerBase
 {
-    private readonly IUserService _userService = new UserService();
+    private readonly IUserService _userService = new UserServiceProxy();
     
     [HttpGet("{requestingLogin}/GetActiveUsers")]
     public async Task<ActionResult<List<User>>> GetActiveUsers(string requestingLogin, string requestingPassword)
@@ -48,7 +48,7 @@ public class UsersController : ControllerBase
 
     [HttpGet("{requestingLogin}/GetUsersOverCertainAge")]
     public async Task<ActionResult<List<User>>> GetUsersOverCertainAge(string requestingLogin, 
-        string requestingPassword, DateTime certainAge)
+        string requestingPassword, uint certainAge)
     {
         if (!await _userService.AdminConfirmationAsync(requestingLogin, requestingPassword))
             return BadRequest("Login or password contains an error!");

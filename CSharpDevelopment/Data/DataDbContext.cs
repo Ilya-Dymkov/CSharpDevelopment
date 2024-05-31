@@ -5,8 +5,13 @@ namespace CSharpDevelopment.Data;
 
 public class DataDbContext : DbContext
 {
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => 
-        optionsBuilder.UseSqlite("Data Source=DataBases/users.db");
-
+    private readonly Func<DbContextOptionsBuilder, DbContextOptionsBuilder> _func;
+    
     public DbSet<User> Users { get; set; }
+
+    public DataDbContext() => _func = builder => builder.UseSqlite("Data Source=DataBases/users.db");
+
+    public DataDbContext(Func<DbContextOptionsBuilder, DbContextOptionsBuilder> func) => _func = func;
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => _func(optionsBuilder);
 }
